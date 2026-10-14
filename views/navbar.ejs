@@ -1,0 +1,32 @@
+<% const activePage = typeof active !== 'undefined' ? active : ''; %>
+<nav class="navbar">
+    <a href="/" class="logo">
+        <img src="/images/logo.png" alt="CSPC Logo" class="logo-image">
+        <span class="logo-text">
+            <strong>CSPC</strong>
+            <small>Lost and Found</small>
+        </span>
+    </a>
+
+    <div class="nav-links">
+        <a href="/" class="<%= activePage === 'home' ? 'active' : '' %>">Home</a>
+        <a href="/items" class="<%= activePage === 'items' ? 'active' : '' %>">Browse Items</a>
+
+        <% if (currentUser) { %>
+            <a href="/my-reports" class="<%= activePage === 'my-reports' ? 'active' : '' %>">My Reports</a>
+            <a href="/report" class="nav-button <%= activePage === 'report' ? 'active' : '' %>">+ Report Item</a>
+            <a href="/logout" class="logout-link">Logout</a>
+        <% } else { %>
+            <a href="/login">Login</a>
+            <a href="/register" class="nav-button">Register</a>
+        <% } %>
+    </div>
+</nav>
+
+<% if (flash) { %>
+    <div class="flash-wrap">
+        <div class="alert alert-<%= flash.type === 'error' ? 'error' : 'success' %>" role="alert">
+            <%= flash.message %>
+        </div>
+    </div>
+<% } %>

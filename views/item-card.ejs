@@ -1,0 +1,38 @@
+<% const badge = itemBadge(item); %>
+<article class="item-card">
+    <a class="item-image" href="/items/<%= item.id %>" aria-label="View details for <%= item.title %>">
+        <% if (item.image) { %>
+            <img
+                src="/<%= String(item.image).replace(/^\/+/, '') %>"
+                alt="<%= item.title %>"
+            >
+        <% } else { %>
+            <div class="item-placeholder">
+                <span>📦</span>
+                <small>No image available</small>
+            </div>
+        <% } %>
+
+        <span class="status-badge <%= badge.cls %>"><%= badge.label %></span>
+    </a>
+
+    <div class="item-info">
+        <h3><a href="/items/<%= item.id %>"><%= item.title %></a></h3>
+
+        <p class="item-location">
+            <span>⌖</span>
+            <%= item.location %>
+        </p>
+
+        <div class="item-meta">
+            <span><%= item.category %></span>
+            <time><%= formatDate(item.created_at) %></time>
+        </div>
+
+        <% if (item.pending_claims > 0) { %>
+            <a class="pending-pill" href="/items/<%= item.id %>">
+                <%= item.pending_claims %> pending claim<%= item.pending_claims > 1 ? 's' : '' %>
+            </a>
+        <% } %>
+    </div>
+</article>

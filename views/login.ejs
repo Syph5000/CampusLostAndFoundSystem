@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | CSPC Lost And Found</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="cspc-login-page">
+
+    <header class="cspc-header">
+        <a href="/" class="cspc-brand">
+            <img src="/images/logo.png" alt="CSPC Logo"
+                 onerror="this.style.display='none'">
+            <h1>Camarines Sur Polytechnic Colleges</h1>
+            <p><span></span>Lost And Found<span></span></p>
+        </a>
+    </header>
+
+    <main class="login-layout">
+
+        <section class="campus-panel">
+            <div class="campus-overlay">
+                <p class="welcome-label">WELCOME BACK</p>
+
+                <h2>Welcome to the<br>
+                    Campus Lost And Found System</h2>
+
+                <p class="campus-description">
+                    Report lost items, find what you've lost, and help keep
+                    our campus community connected.
+                </p>
+
+                <ul class="campus-benefits">
+                    <li><span class="check-icon">✓</span>
+                        Browse reported lost and found items</li>
+                    <li><span class="check-icon">✓</span>
+                        Report an item you lost or found</li>
+                    <li><span class="check-icon">✓</span>
+                        Help return belongings to their rightful owners</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="login-panel">
+            <div class="auth-card">
+                <h2>Sign in</h2>
+                <p class="auth-subtitle">
+                    Enter your credentials to continue.
+                </p>
+
+                <% if (flash) { %>
+                    <p class="<%= flash.type === 'error' ? 'login-error' : 'login-success' %>">
+                        <%= flash.message %>
+                    </p>
+                <% } %>
+
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <p class="login-error"><%= error %></p>
+                <% } %>
+
+                <form action="/login" method="POST">
+                    <div class="form-group">
+                        <label for="email">EMAIL ADDRESS</label>
+                        <input type="email" id="email" name="email"
+                               placeholder="you@university.edu"
+                               autocomplete="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">PASSWORD</label>
+                        <input type="password" id="password" name="password"
+                               placeholder="Enter your password"
+                               autocomplete="current-password" required>
+                    </div>
+
+                    <button type="submit" class="auth-button">
+                        Log in <span>→</span>
+                    </button>
+                </form>
+
+                <div class="auth-divider"><span>OR</span></div>
+
+                <p class="auth-register">
+                    Don't have an account?
+                    <a href="/register">Create a student account →</a>
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<%- include('header', { title: 'Submit a Claim' }) %>
+<%- include('navbar', { active: 'items' }) %>
+
+    <main class="recent-section">
+        <a href="/items/<%= item.id %>" class="view-all">← Back to item</a>
+
+        <div class="section-heading claim-heading">
+            <div>
+                <p class="section-eyebrow">CLAIM THIS ITEM</p>
+                <h2><%= item.title %></h2>
+                <p class="section-description">
+                    Tell the reporter why this item is yours. Mention details only
+                    the owner would know (colour, marks, contents, serial number).
+                </p>
+            </div>
+        </div>
+
+        <form action="/claims/new/<%= item.id %>" method="POST" class="form-card">
+            <% if (error) { %>
+                <div class="alert alert-error" role="alert"><%= error %></div>
+            <% } %>
+
+            <div class="field">
+                <label for="message">Proof of ownership</label>
+                <textarea
+                    id="message"
+                    name="message"
+                    rows="6"
+                    maxlength="1000"
+                    placeholder="Describe the item and how you can prove it is yours"
+                    required
+                ><%= message %></textarea>
+                <p class="hint">At least 10 characters, up to 1000.</p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit Claim</button>
+                <a href="/items/<%= item.id %>" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </main>
+
+<%- include('footer') %>
+</body>
+</html>

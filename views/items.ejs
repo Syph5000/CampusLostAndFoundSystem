@@ -1,0 +1,73 @@
+<%- include('header', { title: 'Browse Items' }) %>
+<%- include('navbar', { active: 'items' }) %>
+
+<%
+    // Build /items links that keep the current search text
+    const filterLink = (type) => {
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (type) params.set('status', type);
+        const query = params.toString();
+        return '/items' + (query ? '?' + query : '');
+    };
+%>
+
+    <main class="recent-section">
+        <div class="section-heading">
+            <div>
+                <p class="section-eyebrow">CAMPUS COMMUNITY</p>
+                <h2>Browse Lost and Found Items</h2>
+                <p class="section-description">
+                    Search for belongings reported by CSPC students.
+                </p>
+            </div>
+        </div>
+
+        <form action="/items" method="GET" class="search-form">
+            <% if (status) { %>
+                <input type="hidden" name="status" value="<%= status %>">
+            <% } %>
+
+            <input
+                type="search"
+                name="search"
+                placeholder="Search by item, category, or location..."
+                aria-label="Search items"
+                value="<%= search || '' %>"
+            >
+
+            <button type="submit">Search</button>
+        </form>
+
+        <div class="filter-chips">
+            <a href="<%= filterLink('') %>" class="chip <%= !status ? 'active' : '' %>">All Items</a>
+            <a href="<%= filterLink('lost') %>" class="chip <%= status === 'lost' ? 'active' : '' %>">Lost Items</a>
+            <a href="<%= filterLink('found') %>" class="chip <%= status === 'found' ? 'active' : '' %>">Found Items</a>
+        </div>
+
+        <p class="results-note">
+            <%= items.length %> item<%= items.length === 1 ? '' : 's' %> found<% if (search) { %> for “<%= search %>”<% } %>
+        </p>
+
+        <% if (items.length > 0) { %>
+            <div class="item-grid">
+                <% items.forEach(item => { %>
+                    <%- include('item-card', { item }) %>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>No items found</h3>
+                <p>
+                    There are no matching reports yet. Try another search
+                    or report a lost or found item.
+                </p>
+                <a href="/report" class="btn btn-primary">Report an Item</a>
+            </div>
+        <% } %>
+    </main>
+
+<%- include('footer') %>
+</body>
+</html>

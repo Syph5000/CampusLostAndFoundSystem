@@ -1,0 +1,15 @@
+<%- include('header') %>
+<%- include('navbar') %>
+
+    <main class="recent-section">
+        <div class="empty-state">
+            <p class="error-code"><%= status %></p>
+            <h3><%= title %></h3>
+            <p><%= message %></p>
+            <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+    </main>
+
+<%- include('footer') %>
+</body>
+</html>

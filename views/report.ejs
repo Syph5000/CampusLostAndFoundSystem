@@ -1,0 +1,116 @@
+<%- include('header', { title: 'Report an Item' }) %>
+<%- include('navbar', { active: 'report' }) %>
+
+    <main class="recent-section">
+        <div class="section-heading">
+            <div>
+                <p class="section-eyebrow">HELP YOUR CAMPUS COMMUNITY</p>
+                <h2>Report an Item</h2>
+                <p class="section-description">
+                    Provide the details of the lost or found item.
+                </p>
+            </div>
+        </div>
+
+        <form
+            action="/report"
+            method="POST"
+            enctype="multipart/form-data"
+            class="form-card"
+        >
+            <% if (error) { %>
+                <div class="alert alert-error" role="alert"><%= error %></div>
+            <% } %>
+
+            <div class="field">
+                <label for="item_type">Report Type</label>
+                <select id="item_type" name="item_type" required>
+                    <option value="">Select report type</option>
+                    <option value="lost" <%= form.item_type === 'lost' ? 'selected' : '' %>>I lost an item</option>
+                    <option value="found" <%= form.item_type === 'found' ? 'selected' : '' %>>I found an item</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="title">Item Name</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Black wallet"
+                    maxlength="150"
+                    value="<%= form.title || '' %>"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="description">Description</label>
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe the item and any identifying details"
+                    rows="4"
+                    required
+                ><%= form.description || '' %></textarea>
+            </div>
+
+            <div class="field">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="">Select category</option>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category %>" <%= form.category === category ? 'selected' : '' %>>
+                            <%= category %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="location">Location</label>
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="Where was it lost or found?"
+                    maxlength="255"
+                    value="<%= form.location || '' %>"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="date_lost_found">Date Lost or Found</label>
+                <input
+                    type="date"
+                    id="date_lost_found"
+                    name="date_lost_found"
+                    value="<%= form.date_lost_found || '' %>"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="image">Photo (optional)</label>
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                >
+                <p class="hint">JPG, PNG, WEBP or GIF, up to 5 MB.</p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Submit Report
+                </button>
+                <a href="/my-reports" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </main>
+
+<%- include('footer') %>
+</body>
+</html>

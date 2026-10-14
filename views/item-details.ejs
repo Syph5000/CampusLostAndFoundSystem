@@ -1,0 +1,135 @@
+<%- include('header') %>
+<%- include('navbar', { active: 'items' }) %>
+
+<% const badge = itemBadge(item); %>
+
+    <main class="recent-section">
+        <a href="/items" class="view-all">← Back to Items</a>
+
+        <article class="item-card detail-card">
+            <div class="detail-media">
+                <% if (item.image) { %>
+                    <img
+                        src="/<%= String(item.image).replace(/^\/+/, '') %>"
+                        alt="<%= item.title %>"
+                    >
+                <% } else { %>
+                    <div class="item-placeholder detail-placeholder">
+                        <span>📦</span>
+                        <small>No image available</small>
+                    </div>
+                <% } %>
+
+                <span class="status-badge <%= badge.cls %>"><%= badge.label %></span>
+            </div>
+
+            <div class="item-info detail-info">
+                <h2><%= item.title %></h2>
+                <p class="detail-description"><%= item.description %></p>
+
+                <dl class="detail-list">
+                    <div>
+                        <dt>Category</dt>
+                        <dd><%= item.category %></dd>
+                    </div>
+                    <div>
+                        <dt>Location</dt>
+                        <dd><%= item.location %></dd>
+                    </div>
+                    <div>
+                        <dt>Date <%= item.item_type === 'found' ? 'found' : 'lost' %></dt>
+                        <dd><%= formatDate(item.date_lost_found) %></dd>
+                    </div>
+                    <div>
+                        <dt>Reported by</dt>
+                        <dd><%= item.reporter_name || 'CSPC Student' %></dd>
+                    </div>
+                </dl>
+
+                <div class="detail-actions">
+                    <% if (!currentUser) { %>
+                        <% if (isOpen) { %>
+                            <a href="/claims/new/<%= item.id %>" class="btn btn-primary">
+                                Log in to submit a claim
+                            </a>
+                        <% } %>
+                    <% } else if (isManager) { %>
+                        <% if (isOpen) { %>
+                            <form method="POST" action="/items/<%= item.id %>/returned">
+                                <button type="submit" class="btn btn-secondary">
+                                    Mark as returned
+                                </button>
+                            </form>
+                        <% } %>
+
+                        <form
+                            method="POST"
+                            action="/items/<%= item.id %>/delete"
+                            onsubmit="return confirm('Delete this report permanently?');"
+                        >
+                            <button type="submit" class="btn btn-danger">
+                                Delete report
+                            </button>
+                        </form>
+                    <% } else if (isOpen) { %>
+                        <% if (myClaim && myClaim.status === 'pending') { %>
+                            <p class="detail-note">
+                                You already submitted a claim for this item. The
+                                reporter will review it.
+                            </p>
+                        <% } else { %>
+                            <a href="/claims/new/<%= item.id %>" class="btn btn-primary">
+                                Submit a Claim
+                            </a>
+                        <% } %>
+                    <% } else { %>
+                        <p class="detail-note">
+                            This item is no longer open for claims.
+                        </p>
+                    <% } %>
+                </div>
+            </div>
+        </article>
+
+        <% if (isManager) { %>
+            <section class="claims-section">
+                <h3>Claims (<%= claims.length %>)</h3>
+
+                <% if (claims.length === 0) { %>
+                    <p class="muted">Nobody has claimed this item yet.</p>
+                <% } else { %>
+                    <% claims.forEach(claim => { %>
+                        <div class="claim-card">
+                            <div class="claim-head">
+                                <strong><%= claim.full_name %></strong>
+                                <span class="pill pill-<%= claim.status %>"><%= claim.status %></span>
+                            </div>
+
+                            <p class="claim-meta">
+                                Student ID: <%= claim.student_id %> ·
+                                <%= claim.email %> ·
+                                <%= formatDate(claim.created_at) %>
+                            </p>
+
+                            <p class="claim-message"><%= claim.message %></p>
+
+                            <% if (claim.status === 'pending' && isOpen) { %>
+                                <div class="claim-actions">
+                                    <form method="POST" action="/claims/<%= claim.id %>/approve">
+                                        <button type="submit" class="btn btn-primary">Approve</button>
+                                    </form>
+                                    <form method="POST" action="/claims/<%= claim.id %>/reject">
+                                        <button type="submit" class="btn btn-secondary">Reject</button>
+                                    </form>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </section>
+        <% } %>
+    </main>
+
+<%- include('footer') %>
+</body>
+</html>

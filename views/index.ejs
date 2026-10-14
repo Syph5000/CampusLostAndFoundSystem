@@ -1,0 +1,97 @@
+<%- include('header', { title: 'Home' }) %>
+<%- include('navbar', { active: 'home' }) %>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+                <p class="eyebrow">CAMARINES SUR POLYTECHNIC COLLEGES</p>
+
+                <h1>
+                    Lost something?<br>
+                    <span>We'll help you find it.</span>
+                </h1>
+
+                <p class="hero-description">
+                    Report lost or found items and reconnect with
+                    your campus community and their belongings.
+                </p>
+
+                <form action="/items" method="GET" class="hero-search">
+                    <input
+                        type="search"
+                        name="search"
+                        placeholder="Search for items..."
+                        aria-label="Search for items"
+                    >
+                    <button type="submit">Search</button>
+                </form>
+
+                <div class="hero-actions">
+                    <a href="/items?status=lost" class="hero-chip">
+                        I Lost Something
+                    </a>
+                    <a href="/items?status=found" class="hero-chip">
+                        I Found Something
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics -->
+        <section class="statistics">
+            <div class="stat-item">
+                <strong><%= stats.total %></strong>
+                <span>Total Items</span>
+            </div>
+
+            <div class="stat-item">
+                <strong><%= stats.lost %></strong>
+                <span>Lost Items</span>
+            </div>
+
+            <div class="stat-item">
+                <strong><%= stats.found %></strong>
+                <span>Found Items</span>
+            </div>
+        </section>
+
+        <!-- Recent Items -->
+        <section class="recent-section">
+            <div class="section-heading">
+                <div>
+                    <p class="section-eyebrow">CAMPUS COMMUNITY</p>
+                    <h2>Recent Items</h2>
+                    <p class="section-description">
+                        Recently reported belongings from our campus.
+                    </p>
+                </div>
+
+                <a href="/items" class="view-all">
+                    View All <span>→</span>
+                </a>
+            </div>
+
+            <% if (items.length > 0) { %>
+                <div class="item-grid">
+                    <% items.forEach(item => { %>
+                        <%- include('item-card', { item }) %>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <h3>No reported items yet</h3>
+                    <p>When someone reports a lost or found item, it will appear here.</p>
+                    <a href="/report" class="btn btn-primary">Report an Item</a>
+                </div>
+            <% } %>
+        </section>
+    </main>
+
+<%- include('footer') %>
+    <script src="/js/script.js"></script>
+</body>
+</html>

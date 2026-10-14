@@ -1,0 +1,83 @@
+<%- include('header', { title: 'My Reports' }) %>
+<%- include('navbar', { active: 'my-reports' }) %>
+
+    <main class="recent-section">
+        <!-- Reports I submitted -->
+        <section class="page-section">
+            <div class="section-heading">
+                <div>
+                    <p class="section-eyebrow">YOUR ACTIVITY</p>
+                    <h2>My Reports</h2>
+                    <p class="section-description">
+                        Items you reported as lost or found.
+                    </p>
+                </div>
+
+                <a href="/report" class="view-all">
+                    Report an Item <span>→</span>
+                </a>
+            </div>
+
+            <% if (items.length > 0) { %>
+                <div class="item-grid">
+                    <% items.forEach(item => { %>
+                        <%- include('item-card', { item }) %>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <h3>You have no reports yet</h3>
+                    <p>Lost or found something on campus? Report it here.</p>
+                    <a href="/report" class="btn btn-primary">Report an Item</a>
+                </div>
+            <% } %>
+        </section>
+
+        <!-- Claims I submitted -->
+        <section class="page-section">
+            <div class="section-heading">
+                <div>
+                    <p class="section-eyebrow">YOUR CLAIMS</p>
+                    <h2>My Claims</h2>
+                    <p class="section-description">
+                        Items you asked to claim and their review status.
+                    </p>
+                </div>
+            </div>
+
+            <% if (claims.length > 0) { %>
+                <div class="claim-list">
+                    <% claims.forEach(claim => { %>
+                        <div class="claim-card">
+                            <div class="claim-head">
+                                <strong>
+                                    <a href="/items/<%= claim.item_id %>"><%= claim.item_title %></a>
+                                </strong>
+                                <span class="pill pill-<%= claim.status %>"><%= claim.status %></span>
+                            </div>
+
+                            <p class="claim-meta">Submitted <%= formatDate(claim.created_at) %></p>
+                            <p class="claim-message"><%= claim.message %></p>
+
+                            <% if (claim.status === 'approved') { %>
+                                <p class="claim-contact">
+                                    Approved! Contact <strong><%= claim.owner_name %></strong>
+                                    at <strong><%= claim.owner_email %></strong> to arrange the return.
+                                </p>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="muted">
+                    You have not claimed any items. Browse the
+                    <a href="/items" class="view-all">found items</a> to look for yours.
+                </p>
+            <% } %>
+        </section>
+    </main>
+
+<%- include('footer') %>
+</body>
+</html>

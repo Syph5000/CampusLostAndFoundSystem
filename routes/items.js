@@ -1,54 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
-const multer = require('multer');
 const db = require('../config/db');
 const { requireLogin } = require('../middleware/auth');
+const { uploadImage, removeFile: removeUploadedFile } = require('../middleware/upload');
 const { CATEGORIES } = require('../config/constants');
-
-// ---------------------------------------------------------------
-// Photo uploads (saved in public/uploads, stored as "uploads/<file>")
-// ---------------------------------------------------------------
-const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
-fs.mkdirSync(uploadDir, { recursive: true });
-
-const IMAGE_TYPES = {
-    'image/jpeg': '.jpg',
-    'image/png': '.png',
-    'image/webp': '.webp',
-    'image/gif': '.gif'
-};
-
-const upload = multer({
-    storage: multer.diskStorage({
-        destination: (req, file, cb) => cb(null, uploadDir),
-        filename: (req, file, cb) => {
-            const name = crypto.randomBytes(12).toString('hex');
-            cb(null, `${Date.now()}-${name}${IMAGE_TYPES[file.mimetype]}`);
-        }
-    }),
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        if (IMAGE_TYPES[file.mimetype]) {
-            return cb(null, true);
-        }
-
-        cb(new Error('Only JPG, PNG, WEBP or GIF images are allowed.'));
-    }
-});
-
-function removeUploadedFile(relativePath) {
-    if (!relativePath) return;
-
-    // Only ever delete files that live inside public/uploads
-    const fullPath = path.join(__dirname, '..', 'public', relativePath);
-
-    if (!fullPath.startsWith(uploadDir + path.sep)) return;
-
-    fs.unlink(fullPath, () => {});
-}
 
 function isValidId(value) {
     return /^\d+$/.test(String(value));
@@ -158,93 +113,86 @@ router.get('/report', requireLogin, (req, res) => {
     renderReport(res, 200, null);
 });
 
-router.post('/report', requireLogin, (req, res) => {
-    upload.single('image')(req, res, async (uploadError) => {
-        const form = req.body || {};
+router.post('/report', requireLogin, uploadImage('image'), async (req, res) => {
+    const form = req.body || {};
 
-        if (uploadError) {
-            const message =
-                uploadError.code === 'LIMIT_FILE_SIZE'
-                    ? 'The photo must be 5 MB or smaller.'
-                    : uploadError.message || 'Unable to upload the photo.';
+    if (req.uploadError) {
+        return renderReport(res, 400, req.uploadError, form);
+    }
 
-            return renderReport(res, 400, message, form);
+    const savedImage = req.file ? `uploads/${req.file.filename}` : null;
+
+    try {
+        const {
+            title,
+            description,
+            category,
+            location,
+            date_lost_found,
+            item_type
+        } = form;
+
+        const reportedDate = new Date(date_lost_found);
+        const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+
+        let problem = null;
+
+        if (
+            !title?.trim() ||
+            !description?.trim() ||
+            !category?.trim() ||
+            !location?.trim() ||
+            !date_lost_found ||
+            !['lost', 'found'].includes(item_type)
+        ) {
+            problem = 'Please complete all fields correctly.';
+        } else if (!CATEGORIES.includes(category)) {
+            problem = 'Please choose a valid category.';
+        } else if (title.trim().length > 150) {
+            problem = 'The item name must be 150 characters or fewer.';
+        } else if (location.trim().length > 255) {
+            problem = 'The location must be 255 characters or fewer.';
+        } else if (
+            Number.isNaN(reportedDate.getTime()) ||
+            reportedDate.getTime() > tomorrow
+        ) {
+            problem = 'Please enter a valid date that is not in the future.';
         }
 
-        const savedImage = req.file ? `uploads/${req.file.filename}` : null;
-
-        try {
-            const {
-                title,
-                description,
-                category,
-                location,
-                date_lost_found,
-                item_type
-            } = form;
-
-            const reportedDate = new Date(date_lost_found);
-            const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-
-            let problem = null;
-
-            if (
-                !title?.trim() ||
-                !description?.trim() ||
-                !category?.trim() ||
-                !location?.trim() ||
-                !date_lost_found ||
-                !['lost', 'found'].includes(item_type)
-            ) {
-                problem = 'Please complete all fields correctly.';
-            } else if (!CATEGORIES.includes(category)) {
-                problem = 'Please choose a valid category.';
-            } else if (title.trim().length > 150) {
-                problem = 'The item name must be 150 characters or fewer.';
-            } else if (location.trim().length > 255) {
-                problem = 'The location must be 255 characters or fewer.';
-            } else if (
-                Number.isNaN(reportedDate.getTime()) ||
-                reportedDate.getTime() > tomorrow
-            ) {
-                problem = 'Please enter a valid date that is not in the future.';
-            }
-
-            if (problem) {
-                removeUploadedFile(savedImage);
-                return renderReport(res, 400, problem, form);
-            }
-
-            await db.promise().execute(
-                `INSERT INTO items
-                    (user_id, title, description, category, location,
-                     date_lost_found, item_type, status, image)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    req.session.user.id,
-                    title.trim(),
-                    description.trim(),
-                    category,
-                    location.trim(),
-                    date_lost_found,
-                    item_type,
-                    item_type,
-                    savedImage
-                ]
-            );
-
-            req.session.flash = {
-                type: 'success',
-                message: 'Your report was submitted. Thank you for helping!'
-            };
-
-            res.redirect('/my-reports');
-        } catch (error) {
-            console.error('Report item error:', error);
+        if (problem) {
             removeUploadedFile(savedImage);
-            renderReport(res, 500, 'Unable to submit your report. Please try again.', form);
+            return renderReport(res, 400, problem, form);
         }
-    });
+
+        await db.promise().execute(
+            `INSERT INTO items
+                (user_id, title, description, category, location,
+                 date_lost_found, item_type, status, image)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                req.session.user.id,
+                title.trim(),
+                description.trim(),
+                category,
+                location.trim(),
+                date_lost_found,
+                item_type,
+                item_type,
+                savedImage
+            ]
+        );
+
+        req.session.flash = {
+            type: 'success',
+            message: 'Your report was submitted. Thank you for helping!'
+        };
+
+        res.redirect('/my-reports');
+    } catch (error) {
+        console.error('Report item error:', error);
+        removeUploadedFile(savedImage);
+        renderReport(res, 500, 'Unable to submit your report. Please try again.', form);
+    }
 });
 
 // ---------------------------------------------------------------

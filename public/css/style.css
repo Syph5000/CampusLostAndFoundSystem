@@ -1783,3 +1783,36 @@ button.btn {
         grid-template-columns: 1fr;
     }
 }
+
+/* Photo upload preview and inline errors */
+
+.field-error {
+    margin-top: 6px;
+    color: #b42318;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.upload-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.upload-preview img {
+    width: 96px;
+    height: 96px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.upload-preview .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+[hidden] {
+    display: none !important;
+}

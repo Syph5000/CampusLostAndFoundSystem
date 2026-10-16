@@ -17,6 +17,8 @@
             method="POST"
             enctype="multipart/form-data"
             class="form-card"
+            id="report-form"
+            novalidate
         >
             <% if (error) { %>
                 <div class="alert alert-error" role="alert"><%= error %></div>
@@ -100,6 +102,11 @@
                     accept="image/jpeg,image/png,image/webp,image/gif"
                 >
                 <p class="hint">JPG, PNG, WEBP or GIF, up to 5 MB.</p>
+                <p class="field-error" id="image-error" role="alert" hidden></p>
+                <div class="upload-preview" id="image-preview" hidden>
+                    <img src="" alt="Selected photo preview">
+                    <button type="button" id="image-clear" class="btn btn-secondary">Remove photo</button>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -112,5 +119,6 @@
     </main>
 
 <%- include('footer') %>
+<script src="/js/script.js"></script>
 </body>
 </html>
